@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { Box, Button, TextField, Typography, Link, Alert } from '@mui/material'
 
@@ -12,33 +12,80 @@ export default function RegisterForm() {
   })
 
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    // Check that all fields are filled
     const allFieldsFilled = Object.values(formData).every(
       (value) => value.trim() !== ''
     )
     if (!allFieldsFilled) {
       setError('Please fill in all fields.')
+      setSuccess('')
       return
     }
 
-    // Check that passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match.')
+      setSuccess('')
       return
     }
 
     setError('')
-    console.log('Registering user:', formData)
+    setSuccess('')
+
+    try {
+      const response = await fetch('http://localhost:3000/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Something went wrong.')
+        setSuccess('')
+        return
+      }
+
+      setSuccess('Registration successful!')
+      setError('')
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+      })
+    } catch (err) {
+      console.error(err)
+      setError('Network error or server is down.')
+      setSuccess('')
+    }
   }
+
+  // Optional: auto-clear alerts after 4s
+  useEffect(() => {
+    if (error || success) {
+      const timer = setTimeout(() => {
+        setError('')
+        setSuccess('')
+      }, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [error, success])
 
   return (
     <Box
@@ -117,6 +164,12 @@ export default function RegisterForm() {
       {error && (
         <Alert severity='error' sx={{ mt: 2 }}>
           {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert severity='success' sx={{ mt: 2 }}>
+          {success}
         </Alert>
       )}
 
