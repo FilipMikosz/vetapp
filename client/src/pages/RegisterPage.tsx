@@ -20,13 +20,24 @@ export default function RegisterForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+
+    // Check that all fields are filled
+    const allFieldsFilled = Object.values(formData).every(
+      (value) => value.trim() !== ''
+    )
+    if (!allFieldsFilled) {
+      setError('Please fill in all fields.')
+      return
+    }
+
+    // Check that passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match.')
       return
     }
+
     setError('')
     console.log('Registering user:', formData)
-    // backend here
   }
 
   return (
