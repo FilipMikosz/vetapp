@@ -1,30 +1,66 @@
 import { useState } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { Box, Button, TextField, Typography, Link, Alert } from '@mui/material'
 
 export default function LoginForm() {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
 
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    // Basic validation example:
+
     if (!formData.email || !formData.password) {
       setError('Please fill in all fields.')
+      setSuccess('')
       return
     }
+
     setError('')
-    // Handle login logic here, e.g., call backend API
-    console.log('Logging in with:', formData)
+    setSuccess('')
+
+    try {
+      const response = await fetch('http://localhost:3000/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || 'Login failed.')
+        setSuccess('')
+        return
+      }
+
+      // Login successful
+      console.log('Login successful:', data)
+
+      localStorage.setItem('token', data.token)
+
+      setSuccess('Login successful!')
+      setError('')
+
+      navigate('/dashboard')
+    } catch (err) {
+      console.error(err)
+      setError('Network error or server is down.')
+      setSuccess('')
+    }
   }
 
   return (
@@ -73,6 +109,12 @@ export default function LoginForm() {
       {error && (
         <Alert severity='error' sx={{ mt: 2 }}>
           {error}
+        </Alert>
+      )}
+
+      {success && (
+        <Alert severity='success' sx={{ mt: 2 }}>
+          {success}
         </Alert>
       )}
 
