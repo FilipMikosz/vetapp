@@ -1,15 +1,15 @@
-import {
-  Dashboard as DashboardIcon,
-  Logout as LogoutIcon,
-  Menu as MenuIcon,
-  Person as PersonIcon,
-  Settings as SettingsIcon,
-} from '@mui/icons-material'
+import React, { useState } from 'react'
 import {
   AppBar,
   Avatar,
   Box,
+  Button,
   CssBaseline,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   Drawer,
   IconButton,
@@ -20,62 +20,60 @@ import {
   ListItemText,
   Toolbar,
   Typography,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
 } from '@mui/material'
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import {
+  Dashboard as DashboardIcon,
+  Logout as LogoutIcon,
+  Menu as MenuIcon,
+  Person as PersonIcon,
+  Settings as SettingsIcon,
+} from '@mui/icons-material'
+import { Outlet, useNavigate } from 'react-router-dom'
 
 const drawerWidth = 240
 
 export default function Dashboard() {
-  const [mobileOpen, setMobileOpen] = React.useState(false)
-  const [logoutDialogOpen, setLogoutDialogOpen] = React.useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
   const navigate = useNavigate()
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-  }
-
-  const handleLogoutClick = () => {
-    setLogoutDialogOpen(true)
-  }
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen)
+  const handleLogoutClick = () => setLogoutDialogOpen(true)
+  const handleLogoutCancel = () => setLogoutDialogOpen(false)
 
   const confirmLogout = () => {
-    setLogoutDialogOpen(false)
-
     localStorage.removeItem('token')
     navigate('/login')
   }
 
-  const drawer = (
+  const menuItems = [
+    { text: 'Records', icon: <DashboardIcon />, path: 'records' },
+    { text: 'Profile', icon: <PersonIcon />, path: 'profile' },
+    { text: 'Settings', icon: <SettingsIcon />, path: 'settings' },
+    { text: 'Logout', icon: <LogoutIcon />, action: handleLogoutClick },
+  ]
+
+  const drawerContent = (
     <div>
       <Toolbar />
       <Divider />
       <List>
-        {['Records', 'Profile', 'Settings', 'Logout'].map((text, index) => {
-          const icons = [
-            <DashboardIcon />,
-            <PersonIcon />,
-            <SettingsIcon />,
-            <LogoutIcon />,
-          ]
-          const isLogout = text === 'Logout'
-          return (
-            <ListItem disablePadding key={text}>
-              <ListItemButton
-                onClick={isLogout ? handleLogoutClick : undefined}
-              >
-                <ListItemIcon>{icons[index]}</ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          )
-        })}
+        {menuItems.map(({ text, icon, path, action }) => (
+          <ListItem disablePadding key={text}>
+            <ListItemButton
+              onClick={() => {
+                if (action) {
+                  action()
+                } else {
+                  navigate(`/dashboard/${path}`)
+                }
+              }}
+            >
+              <ListItemIcon>{icon}</ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
       </List>
     </div>
   )
@@ -83,6 +81,8 @@ export default function Dashboard() {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
+
+      {/* Top AppBar */}
       <AppBar
         position='fixed'
         sx={{
@@ -107,18 +107,18 @@ export default function Dashboard() {
           <Avatar alt='User' src='/static/images/avatar/1.jpg' />
         </Toolbar>
       </AppBar>
+
+      {/* Side Drawer */}
       <Box
         component='nav'
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label='mailbox folders'
+        aria-label='sidebar'
       >
         <Drawer
           variant='temporary'
           open={mobileOpen}
           onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
+          ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', sm: 'none' },
             '& .MuiDrawer-paper': {
@@ -127,7 +127,7 @@ export default function Dashboard() {
             },
           }}
         >
-          {drawer}
+          {drawerContent}
         </Drawer>
         <Drawer
           variant='permanent'
@@ -140,9 +140,11 @@ export default function Dashboard() {
           }}
           open
         >
-          {drawer}
+          {drawerContent}
         </Drawer>
       </Box>
+
+      {/* Main Content */}
       <Box
         component='main'
         sx={{
@@ -152,16 +154,14 @@ export default function Dashboard() {
         }}
       >
         <Toolbar />
-        <Typography paragraph>
+        {/* <Typography variant='body1'>
           Welcome to your dashboard. Add your widgets or components here.
-        </Typography>
+        </Typography> */}
+        <Outlet />
       </Box>
 
       {/* Logout Confirmation Dialog */}
-      <Dialog
-        open={logoutDialogOpen}
-        onClose={() => setLogoutDialogOpen(false)}
-      >
+      <Dialog open={logoutDialogOpen} onClose={handleLogoutCancel}>
         <DialogTitle>Confirm Logout</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -169,7 +169,7 @@ export default function Dashboard() {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setLogoutDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleLogoutCancel}>Cancel</Button>
           <Button onClick={confirmLogout} color='error'>
             Logout
           </Button>
