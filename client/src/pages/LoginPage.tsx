@@ -46,7 +46,7 @@ export default function LoginForm() {
         setSuccess('')
         return
       }
-
+      navigate('/dashboard')
       // Login successful
       console.log('Login successful:', data)
 
@@ -54,8 +54,6 @@ export default function LoginForm() {
 
       setSuccess('Login successful!')
       setError('')
-
-      navigate('/dashboard')
     } catch (err) {
       console.error(err)
       setError('Network error or server is down.')
