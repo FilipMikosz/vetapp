@@ -6,9 +6,12 @@ import ProtectedRoute from './routes/ProtectedRoute'
 import DoctorDashboardLayout from './pages/Dashboard/Doctor/DoctorDashboardLayout'
 import ClientDashboardLayout from './pages/Dashboard/Client/ClientDashboardLayout'
 import Records from './pages/Dashboard/Doctor/Records'
-import Profile from './pages/Dashboard/Doctor/Profile'
-import Settings from './pages/Dashboard/Doctor/Settings'
+
 import { jwtDecode } from 'jwt-decode'
+import DoctorProfile from './pages/Dashboard/Doctor/DoctorProfile'
+import DoctorSettings from './pages/Dashboard/Doctor/DoctorSettings'
+import ClientProfile from './pages/Dashboard/Client/ClientProfile'
+import ClientSettings from './pages/Dashboard/Client/ClientSettings'
 
 type DecodedToken = { role?: 'doctor' | 'owner' }
 
@@ -44,8 +47,8 @@ function App() {
           >
             <Route index element={<p>Doctor Dashboard</p>} />
             <Route path='records' element={<Records />} />
-            <Route path='profile' element={<Profile />} />
-            <Route path='settings' element={<Settings />} />
+            <Route path='profile' element={<DoctorProfile />} />
+            <Route path='settings' element={<DoctorSettings />} />
           </Route>
         )}
 
@@ -61,6 +64,8 @@ function App() {
           >
             <Route index element={<p>Client Dashboard</p>} />
             {/* Add client-specific subroutes here */}
+            <Route path='profile' element={<ClientProfile />} />
+            <Route path='settings' element={<ClientSettings />} />
           </Route>
         )}
 
