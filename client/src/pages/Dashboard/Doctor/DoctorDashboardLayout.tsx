@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   AppBar,
   Avatar,
@@ -32,7 +32,7 @@ import { Outlet, useNavigate } from 'react-router-dom'
 
 const drawerWidth = 240
 
-export default function Dashboard() {
+export default function DoctorDashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false)
   const navigate = useNavigate()
