@@ -4,16 +4,16 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 const createUser = async (req, res) => {
-  const { firstName, lastName, email, password } = req.body
+  const { firstName, lastName, email, password, role } = req.body
 
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !email || !password || !role) {
     return res.status(400).json({ error: 'Please fill all required fields.' })
   }
 
   try {
     // Check if user already exists
     const userExists = await pool.query(
-      'SELECT * FROM owners WHERE email = $1',
+      'SELECT * FROM users WHERE email = $1',
       [email]
     )
     if (userExists.rows.length > 0) {
@@ -25,8 +25,8 @@ const createUser = async (req, res) => {
 
     // Insert user into DB
     const newUser = await pool.query(
-      'INSERT INTO owners (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *',
-      [firstName, lastName, email, hashedPassword]
+      'INSERT INTO users (first_name, last_name, email, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [firstName, lastName, email, hashedPassword, role]
     )
 
     res.status(201).json({ user: newUser.rows[0] })
@@ -47,7 +47,7 @@ const loginUser = async (req, res) => {
 
   try {
     const userResult = await pool.query(
-      'SELECT * FROM owners WHERE email = $1',
+      'SELECT * FROM users WHERE email = $1',
       [email]
     )
 
@@ -75,7 +75,9 @@ const loginUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM owners')
+    const result = await pool.query('SELECT * FROM users WHERE role = $1', [
+      'owner',
+    ])
     res.status(200).json(result.rows)
   } catch (err) {
     console.error(err)

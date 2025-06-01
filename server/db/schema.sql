@@ -1,6 +1,7 @@
--- 🧑 Owners (właściciele)
-CREATE TABLE owners (
+-- 👤 Users (owners and doctors)
+CREATE TABLE users (
   id SERIAL PRIMARY KEY,
+  role VARCHAR(20) CHECK (role IN ('owner', 'doctor')) NOT NULL,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -11,12 +12,12 @@ CREATE TABLE owners (
 -- 🐶 Dogs (psy)
 CREATE TABLE dogs (
   id SERIAL PRIMARY KEY,
-  owner_id INTEGER REFERENCES owners(id) ON DELETE CASCADE,
+  owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   breed TEXT,
   birth_year INTEGER,
   chip_number TEXT UNIQUE,
-  kennel_name TEXT -- nazwa hodowli (optional)
+  kennel_name TEXT
 );
 
 -- 📅 Litters (mioty)
@@ -24,7 +25,7 @@ CREATE TABLE litters (
   id SERIAL PRIMARY KEY,
   dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
   year INTEGER NOT NULL,
-  description TEXT -- optional
+  description TEXT
 );
 
 -- 🦠 Past illnesses (przebyte choroby)
@@ -96,7 +97,7 @@ CREATE TABLE special_notes (
 CREATE TABLE visits (
   id SERIAL PRIMARY KEY,
   dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
-  doctor_name TEXT,
+  doctor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   visit_date TIMESTAMP NOT NULL,
   reason TEXT,
   notes TEXT

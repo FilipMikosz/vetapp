@@ -1,9 +1,21 @@
 import { useState, useEffect } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
-import { Box, Button, TextField, Typography, Link, Alert } from '@mui/material'
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Link,
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material'
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({
+    role: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -45,6 +57,7 @@ export default function RegisterForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          role: formData.role,
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
@@ -63,6 +76,7 @@ export default function RegisterForm() {
       setSuccess('Registration successful!')
       setError('')
       setFormData({
+        role: '',
         firstName: '',
         lastName: '',
         email: '',
@@ -107,6 +121,22 @@ export default function RegisterForm() {
       <Typography variant='h5' component='h1' align='center' mb={3}>
         Register
       </Typography>
+
+      <FormControl fullWidth required margin='normal'>
+        <InputLabel id='role-label'>I am a...</InputLabel>
+        <Select
+          labelId='role-label'
+          name='role'
+          value={formData.role}
+          label='I am a...'
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, role: e.target.value }))
+          }
+        >
+          <MenuItem value='owner'>Pet Owner</MenuItem>
+          <MenuItem value='doctor'>Veterinarian</MenuItem>
+        </Select>
+      </FormControl>
 
       <TextField
         label='First Name'
