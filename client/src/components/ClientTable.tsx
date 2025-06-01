@@ -49,8 +49,9 @@ export default function ClientTable() {
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    // Replace this with real fetch in production
-    setOwners(mockData)
+    fetch('http://localhost:3000/api/users/getusers')
+      .then((res) => res.json())
+      .then((data) => setOwners(data))
   }, [])
 
   const filteredOwners = owners.filter((owner) =>
@@ -74,10 +75,10 @@ export default function ClientTable() {
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
-              <TableCell>Imię</TableCell>
-              <TableCell>Nazwisko</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Surname</TableCell>
               <TableCell>Email</TableCell>
-              <TableCell>Data rejestracji</TableCell>
+              <TableCell>Registration Date</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -87,7 +88,7 @@ export default function ClientTable() {
                 <TableCell>{owner.first_name}</TableCell>
                 <TableCell>{owner.last_name}</TableCell>
                 <TableCell>{owner.email}</TableCell>
-                <TableCell>{owner.created_at}</TableCell>
+                <TableCell>{owner.created_at.slice(0, 10)}</TableCell>
               </TableRow>
             ))}
             {filteredOwners.length === 0 && (

@@ -73,4 +73,14 @@ const loginUser = async (req, res) => {
   }
 }
 
-module.exports = { createUser, loginUser }
+const getUsers = async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM owners')
+    res.status(200).json(result.rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
+module.exports = { createUser, loginUser, getUsers }

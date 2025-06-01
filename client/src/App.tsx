@@ -23,7 +23,7 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Records />} />
+          <Route index element={<p>Dashboard</p>} />
           <Route path='records' element={<Records />} />
           <Route path='profile' element={<Profile />} />
           <Route path='settings' element={<Settings />} />
