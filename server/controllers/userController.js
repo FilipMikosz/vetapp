@@ -1,6 +1,7 @@
 const pool = require('../db/db')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const { user } = require('pg/lib/defaults.js')
 require('dotenv').config()
 
 const createUser = async (req, res) => {
@@ -89,4 +90,26 @@ const getUsers = async (req, res) => {
   }
 }
 
-module.exports = { createUser, loginUser, getUsers }
+const getUserProfile = async (req, res) => {
+  try {
+    // userId comes from authMiddleware via req.user
+    const userId = req.user.userId
+
+    // Get user info from DB
+    const result = await pool.query(
+      'SELECT id, first_name, last_name, email, role FROM users WHERE id = $1',
+      [userId]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    res.json(result.rows[0])
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
+
+module.exports = { createUser, loginUser, getUsers, getUserProfile }
