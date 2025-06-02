@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Box,
   Table,
@@ -9,7 +9,6 @@ import {
   TableRow,
   Paper,
   TextField,
-  Typography,
 } from '@mui/material'
 
 interface Owner {
@@ -19,30 +18,6 @@ interface Owner {
   email: string
   created_at: string
 }
-
-const mockData: Owner[] = [
-  {
-    id: 1,
-    first_name: 'Anna',
-    last_name: 'Kowalska',
-    email: 'anna.kowalska@example.com',
-    created_at: '2024-01-10',
-  },
-  {
-    id: 2,
-    first_name: 'Marek',
-    last_name: 'Nowak',
-    email: 'marek.nowak@example.com',
-    created_at: '2023-12-15',
-  },
-  {
-    id: 3,
-    first_name: 'Julia',
-    last_name: 'Wiśniewska',
-    email: 'julia.w@example.com',
-    created_at: '2024-03-20',
-  },
-]
 
 export default function ClientTable() {
   const [owners, setOwners] = useState<Owner[]>([])

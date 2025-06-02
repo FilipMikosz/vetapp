@@ -9,8 +9,8 @@ CREATE TABLE users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 🐶 Dogs (psy)
-CREATE TABLE dogs (
+-- 🐶 Animals (formerly dogs)
+CREATE TABLE animals (
   id SERIAL PRIMARY KEY,
   owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE dogs (
 -- 📅 Litters (mioty)
 CREATE TABLE litters (
   id SERIAL PRIMARY KEY,
-  dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
+  animal_id INTEGER REFERENCES animals(id) ON DELETE CASCADE,
   year INTEGER NOT NULL,
   description TEXT
 );
@@ -31,7 +31,7 @@ CREATE TABLE litters (
 -- 🦠 Past illnesses (przebyte choroby)
 CREATE TABLE illnesses (
   id SERIAL PRIMARY KEY,
-  dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
+  animal_id INTEGER REFERENCES animals(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   date DATE,
   notes TEXT
@@ -40,7 +40,7 @@ CREATE TABLE illnesses (
 -- 💉 Vaccinations (szczepienia)
 CREATE TABLE vaccinations (
   id SERIAL PRIMARY KEY,
-  dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
+  animal_id INTEGER REFERENCES animals(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   date DATE,
   mandatory BOOLEAN DEFAULT FALSE
@@ -49,7 +49,7 @@ CREATE TABLE vaccinations (
 -- 💊 Prescribed medications (przepisane leki)
 CREATE TABLE prescriptions (
   id SERIAL PRIMARY KEY,
-  dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
+  animal_id INTEGER REFERENCES animals(id) ON DELETE CASCADE,
   medication_name TEXT,
   dosage TEXT,
   date_prescribed DATE,
@@ -59,7 +59,7 @@ CREATE TABLE prescriptions (
 -- 💊 Meds given in clinic (otrzymane leki w gabinecie)
 CREATE TABLE administered_medications (
   id SERIAL PRIMARY KEY,
-  dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
+  animal_id INTEGER REFERENCES animals(id) ON DELETE CASCADE,
   medication_name TEXT,
   dosage TEXT,
   date_administered DATE
@@ -68,7 +68,7 @@ CREATE TABLE administered_medications (
 -- 🖼️ X-ray/Ultrasound images (RTG/USG)
 CREATE TABLE imaging (
   id SERIAL PRIMARY KEY,
-  dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
+  animal_id INTEGER REFERENCES animals(id) ON DELETE CASCADE,
   type TEXT CHECK (type IN ('RTG', 'USG')),
   image_url TEXT,
   date DATE,
@@ -78,7 +78,7 @@ CREATE TABLE imaging (
 -- 🧪 Test results (badania)
 CREATE TABLE lab_tests (
   id SERIAL PRIMARY KEY,
-  dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
+  animal_id INTEGER REFERENCES animals(id) ON DELETE CASCADE,
   test_name TEXT,
   result TEXT,
   date DATE,
@@ -88,7 +88,7 @@ CREATE TABLE lab_tests (
 -- 📋 Special notes (zalecenia specjalne)
 CREATE TABLE special_notes (
   id SERIAL PRIMARY KEY,
-  dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
+  animal_id INTEGER REFERENCES animals(id) ON DELETE CASCADE,
   note TEXT NOT NULL,
   date_added DATE DEFAULT CURRENT_DATE
 );
@@ -96,7 +96,7 @@ CREATE TABLE special_notes (
 -- 📆 Visit calendar (wizyty)
 CREATE TABLE visits (
   id SERIAL PRIMARY KEY,
-  dog_id INTEGER REFERENCES dogs(id) ON DELETE CASCADE,
+  animal_id INTEGER REFERENCES animals(id) ON DELETE CASCADE,
   doctor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   visit_date TIMESTAMP NOT NULL,
   reason TEXT,

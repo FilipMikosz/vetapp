@@ -8,9 +8,9 @@ const {
 } = require('../controllers/userController')
 const authMiddleware = require('../middleware/authMiddleware')
 
-router.post('/users/register', createUser)
-router.post('/users/login', loginUser)
-router.get('/users/getusers', getUsers)
-router.get('/users/profile', authMiddleware, getUserProfile)
+router.post('/register', createUser)
+router.post('/login', loginUser)
+router.get('/getusers', getUsers)
+router.get('/profile', authMiddleware, getUserProfile)
 
 module.exports = router

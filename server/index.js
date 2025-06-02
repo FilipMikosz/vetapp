@@ -1,19 +1,18 @@
 const express = require('express')
 const pool = require('./db/db')
 const userRoutes = require('./routes/userRoutes')
+const recordRoutes = require('./routes/recordRoutes')
 const cors = require('cors')
 
 require('dotenv').config()
 
 const app = express()
+
 app.use(cors())
 app.use(express.json())
 
-app.use('/api', userRoutes)
-
-app.get('/', (req, res) => {
-  res.send('VetApp backend is running!')
-})
+app.use('/api/users', userRoutes)
+app.use('/api/records', recordRoutes)
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
