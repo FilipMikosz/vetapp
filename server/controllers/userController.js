@@ -1,7 +1,6 @@
 const pool = require('../db/db')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const { user } = require('pg/lib/defaults.js')
 require('dotenv').config()
 
 const createUser = async (req, res) => {

@@ -9,7 +9,13 @@ import {
   TableRow,
   Paper,
   TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
 } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
+import AnimalRecordsViewer from './AnimalRecordsViewer' // import your component here
 
 interface Owner {
   id: number
@@ -22,6 +28,7 @@ interface Owner {
 export default function ClientTable() {
   const [owners, setOwners] = useState<Owner[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedOwner, setSelectedOwner] = useState<Owner | null>(null)
 
   useEffect(() => {
     fetch('http://localhost:3000/api/users/getusers')
@@ -58,7 +65,12 @@ export default function ClientTable() {
           </TableHead>
           <TableBody>
             {filteredOwners.map((owner) => (
-              <TableRow key={owner.id}>
+              <TableRow
+                key={owner.id}
+                hover
+                sx={{ cursor: 'pointer' }}
+                onClick={() => setSelectedOwner(owner)}
+              >
                 <TableCell>{owner.id}</TableCell>
                 <TableCell>{owner.first_name}</TableCell>
                 <TableCell>{owner.last_name}</TableCell>
@@ -76,6 +88,40 @@ export default function ClientTable() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Modal popup for animals and records */}
+      <Dialog
+        open={!!selectedOwner}
+        onClose={() => setSelectedOwner(null)}
+        fullWidth
+        maxWidth='xl'
+        scroll='paper'
+      >
+        <DialogTitle>
+          Zwierzęta właściciela: {selectedOwner?.first_name}{' '}
+          {selectedOwner?.last_name}
+          <IconButton
+            aria-label='close'
+            onClick={() => setSelectedOwner(null)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {selectedOwner && (
+            <AnimalRecordsViewer
+              userId={selectedOwner.id}
+              open={!!selectedOwner}
+              onClose={() => setSelectedOwner(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   )
 }

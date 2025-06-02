@@ -8,7 +8,12 @@ require('dotenv').config()
 
 const app = express()
 
-app.use(cors())
+app.use(
+  cors({
+    origin: 'http://localhost:5173', // frontend origin here
+    credentials: true, // enable Set-Cookie headers and cookies
+  })
+)
 app.use(express.json())
 
 app.use('/api/users', userRoutes)
