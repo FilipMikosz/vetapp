@@ -116,6 +116,21 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
       return <Typography variant='body2'>Brak danych</Typography>
     }
 
+    // Format ISO strings like "2023-08-01T22:00:00.000Z" to "YYYY-MM-DD HH:mm"
+    const formatDateTime = (value: any): string => {
+      const date = new Date(value)
+      if (isNaN(date.getTime())) return String(value)
+
+      const pad = (n: number) => n.toString().padStart(2, '0')
+      const yyyy = date.getFullYear()
+      const mm = pad(date.getMonth() + 1)
+      const dd = pad(date.getDate())
+      const hh = pad(date.getHours())
+      const mi = pad(date.getMinutes())
+
+      return `${yyyy}-${mm}-${dd} ${hh}:${mi}`
+    }
+
     return data.map((item, index) => {
       const filteredItem = { ...item }
       delete filteredItem.id
@@ -123,11 +138,18 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
 
       return (
         <Paper key={index} variant='outlined' sx={{ p: 1, mb: 1 }}>
-          {Object.entries(filteredItem).map(([key, value]) => (
-            <Typography key={key} variant='body2' sx={{ mb: 0.5 }}>
-              <strong>{key.replace(/_/g, ' ')}:</strong> {String(value)}
-            </Typography>
-          ))}
+          {Object.entries(filteredItem).map(([key, value]) => {
+            const displayValue =
+              typeof value === 'string' && value.match(/^\d{4}-\d{2}-\d{2}T/)
+                ? formatDateTime(value)
+                : String(value)
+
+            return (
+              <Typography key={key} variant='body2' sx={{ mb: 0.5 }}>
+                <strong>{key.replace(/_/g, ' ')}:</strong> {displayValue}
+              </Typography>
+            )
+          })}
         </Paper>
       )
     })
