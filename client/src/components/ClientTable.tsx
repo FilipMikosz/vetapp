@@ -97,21 +97,6 @@ export default function ClientTable() {
         maxWidth='xl'
         scroll='paper'
       >
-        <DialogTitle>
-          Zwierzęta właściciela: {selectedOwner?.first_name}{' '}
-          {selectedOwner?.last_name}
-          <IconButton
-            aria-label='close'
-            onClick={() => setSelectedOwner(null)}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
         <DialogContent dividers>
           {selectedOwner && (
             <AnimalRecordsViewer

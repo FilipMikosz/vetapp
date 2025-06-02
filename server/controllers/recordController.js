@@ -13,8 +13,9 @@ const getAnimalRecordsByUserId = async (req, res) => {
 
     const animals = animalsResult.rows
 
+    // If no animals, return empty array with 200 OK
     if (animals.length === 0) {
-      return res.status(404).json({ message: 'No animals found for this user' })
+      return res.status(200).json([])
     }
 
     // Step 2: For each animal, get related records

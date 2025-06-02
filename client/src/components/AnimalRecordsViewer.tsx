@@ -85,7 +85,6 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
         setRecords(data)
       } catch (error: any) {
         if (error.name === 'AbortError') {
-          // fetch aborted
           console.log('Fetch aborted')
         } else {
           console.error('Fetch error:', error)
@@ -111,9 +110,32 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
     onClose()
   }
 
+  // Render each item nicely, exclude 'id' and 'animal_id'
+  const renderNiceData = (data: any[]) => {
+    if (data.length === 0) {
+      return <Typography variant='body2'>Brak danych</Typography>
+    }
+
+    return data.map((item, index) => {
+      const filteredItem = { ...item }
+      delete filteredItem.id
+      delete filteredItem.animal_id
+
+      return (
+        <Paper key={index} variant='outlined' sx={{ p: 1, mb: 1 }}>
+          {Object.entries(filteredItem).map(([key, value]) => (
+            <Typography key={key} variant='body2' sx={{ mb: 0.5 }}>
+              <strong>{key.replace(/_/g, ' ')}:</strong> {String(value)}
+            </Typography>
+          ))}
+        </Paper>
+      )
+    })
+  }
+
   return (
     <Dialog open={open} onClose={handleDialogClose} fullWidth maxWidth='lg'>
-      <DialogTitle>Zwierzęta właściciela #{userId}</DialogTitle>
+      <DialogTitle>Zwierzęta właściciela o id: {userId}</DialogTitle>
       <DialogContent>
         {loading ? (
           <Box
@@ -125,11 +147,17 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
             <CircularProgress />
           </Box>
         ) : (
-          <Box display='flex' gap={2}>
-            <Box width='30%' maxHeight='70vh' overflow='auto'>
-              <Typography variant='h6' mb={1}>
-                Zwierzęta
-              </Typography>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            {/* Left side: animal list */}
+            <Box
+              sx={{
+                width: '30%',
+                maxHeight: '70vh',
+                overflowY: 'auto',
+                borderRight: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
               <List disablePadding>
                 {records.length === 0 ? (
                   <Typography variant='body2' color='text.secondary' p={2}>
@@ -145,12 +173,10 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
                         mb: 1,
                         bgcolor:
                           selectedAnimal?.animal.id === record.animal.id
-                            ? 'primary.light'
+                            ? 'action.hover'
                             : 'background.paper',
                         cursor: 'pointer',
-                        '&:hover': {
-                          bgcolor: 'action.hover',
-                        },
+                        userSelect: 'none',
                       }}
                       onClick={() => handleAnimalClick(record)}
                     >
@@ -167,11 +193,19 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
               </List>
             </Box>
 
-            <Box width='70%' maxHeight='70vh' overflow='auto'>
-              {selectedAnimal ? (
+            {/* Right side: selected animal details */}
+            <Box
+              sx={{
+                width: '70%',
+                maxHeight: '70vh',
+                overflowY: 'auto',
+                px: 2,
+              }}
+            >
+              {selectedAnimal && (
                 <>
                   <Typography variant='h6' mb={2}>
-                    Dane medyczne: {selectedAnimal.animal.name}
+                    Medical record: {selectedAnimal.animal.name}
                   </Typography>
 
                   {[
@@ -195,29 +229,11 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
                         </Typography>
                       </AccordionSummary>
                       <AccordionDetails>
-                        {data.length === 0 ? (
-                          <Typography variant='body2'>Brak danych</Typography>
-                        ) : (
-                          data.map((item, index) => (
-                            <Paper
-                              key={index}
-                              variant='outlined'
-                              sx={{ p: 1, mb: 1, whiteSpace: 'pre-wrap' }}
-                            >
-                              <pre style={{ margin: 0, fontSize: '0.8rem' }}>
-                                {JSON.stringify(item, null, 2)}
-                              </pre>
-                            </Paper>
-                          ))
-                        )}
+                        {renderNiceData(data)}
                       </AccordionDetails>
                     </Accordion>
                   ))}
                 </>
-              ) : (
-                <Typography variant='body1' color='text.secondary' mt={2}>
-                  Wybierz zwierzę, aby zobaczyć dane
-                </Typography>
               )}
             </Box>
           </Box>
