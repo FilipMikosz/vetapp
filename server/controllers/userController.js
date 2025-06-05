@@ -111,4 +111,31 @@ const getUserProfile = async (req, res) => {
   }
 }
 
-module.exports = { createUser, loginUser, getUsers, getUserProfile }
+const getUsernameById = async (req, res) => {
+  const userId = req.params.userId
+
+  try {
+    const result = await pool.query(
+      'SELECT first_name, last_name FROM users WHERE id = $1',
+      [userId]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
+    const user = result.rows[0]
+    res.json({ firstName: user.first_name, lastName: user.last_name })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
+
+module.exports = {
+  createUser,
+  loginUser,
+  getUsers,
+  getUserProfile,
+  getUsernameById,
+}

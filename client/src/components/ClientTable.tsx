@@ -10,11 +10,8 @@ import {
   Paper,
   TextField,
   Dialog,
-  DialogTitle,
   DialogContent,
-  IconButton,
 } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
 import AnimalRecordsViewer from './AnimalRecordsViewer' // import your component here
 
 interface Owner {

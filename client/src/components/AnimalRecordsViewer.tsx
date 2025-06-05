@@ -47,6 +47,7 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
   const [records, setRecords] = useState<RecordGroup[]>([])
   const [selectedAnimal, setSelectedAnimal] = useState<RecordGroup | null>(null)
   const [loading, setLoading] = useState(false)
+  const [ownerName, setOwnerName] = useState('')
 
   useEffect(() => {
     if (!open) return
@@ -61,6 +62,32 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
 
     const controller = new AbortController()
     const signal = controller.signal
+
+    const fetchOwnerName = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/api/users/username/${userId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+
+        if (!res.ok) {
+          throw new Error(
+            `Error fetching user name: ${res.status} ${res.statusText}`
+          )
+        }
+
+        const data = await res.json()
+        setOwnerName(`${data.firstName} ${data.lastName}`)
+      } catch (error) {
+        console.error('Error fetching owner name:', error)
+      }
+    }
 
     const fetchRecords = async () => {
       setLoading(true)
@@ -94,6 +121,7 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
       }
     }
 
+    fetchOwnerName()
     fetchRecords()
 
     return () => {
@@ -110,25 +138,18 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
     onClose()
   }
 
-  // Render each item nicely, exclude 'id' and 'animal_id'
   const renderNiceData = (data: any[]) => {
     if (data.length === 0) {
       return <Typography variant='body2'>Brak danych</Typography>
     }
 
-    // Format ISO strings like "2023-08-01T22:00:00.000Z" to "YYYY-MM-DD HH:mm"
     const formatDateTime = (value: any): string => {
       const date = new Date(value)
       if (isNaN(date.getTime())) return String(value)
-
       const pad = (n: number) => n.toString().padStart(2, '0')
-      const yyyy = date.getFullYear()
-      const mm = pad(date.getMonth() + 1)
-      const dd = pad(date.getDate())
-      const hh = pad(date.getHours())
-      const mi = pad(date.getMinutes())
-
-      return `${yyyy}-${mm}-${dd} ${hh}:${mi}`
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+        date.getDate()
+      )} ${pad(date.getHours())}:${pad(date.getMinutes())}`
     }
 
     return data.map((item, index) => {
@@ -157,7 +178,7 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
 
   return (
     <Dialog open={open} onClose={handleDialogClose} fullWidth maxWidth='lg'>
-      <DialogTitle>Zwierzęta właściciela o id: {userId}</DialogTitle>
+      <DialogTitle>Zwierzęta właściciela: {ownerName || '...'}</DialogTitle>
       <DialogContent>
         {loading ? (
           <Box
@@ -170,7 +191,6 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
           </Box>
         ) : (
           <Box sx={{ display: 'flex', gap: 2 }}>
-            {/* Left side: animal list */}
             <Box
               sx={{
                 width: '30%',
@@ -215,14 +235,8 @@ export default function AnimalRecordsViewer({ userId, open, onClose }: Props) {
               </List>
             </Box>
 
-            {/* Right side: selected animal details */}
             <Box
-              sx={{
-                width: '70%',
-                maxHeight: '70vh',
-                overflowY: 'auto',
-                px: 2,
-              }}
+              sx={{ width: '70%', maxHeight: '70vh', overflowY: 'auto', px: 2 }}
             >
               {selectedAnimal && (
                 <>
