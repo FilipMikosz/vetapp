@@ -12,6 +12,8 @@ import DoctorProfile from './pages/Dashboard/Doctor/DoctorProfile'
 import DoctorSettings from './pages/Dashboard/Doctor/DoctorSettings'
 import ClientProfile from './pages/Dashboard/Client/ClientProfile'
 import ClientSettings from './pages/Dashboard/Client/ClientSettings'
+import MyDoctors from './pages/Dashboard/Client/MyDoctors'
+import MyAnimals from './pages/Dashboard/Client/MyAnimals'
 
 type DecodedToken = { role?: 'doctor' | 'owner' }
 
@@ -64,6 +66,8 @@ function App() {
           >
             <Route index element={<p>Client Dashboard</p>} />
             {/* Add client-specific subroutes here */}
+            <Route path='my-doctors' element={<MyDoctors />} />
+            <Route path='my-animals' element={<MyAnimals />} />
             <Route path='profile' element={<ClientProfile />} />
             <Route path='settings' element={<ClientSettings />} />
           </Route>

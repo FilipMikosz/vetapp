@@ -9,6 +9,15 @@ CREATE TABLE users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 👥 Doctor-Client relationship table
+CREATE TABLE user_doctor (
+  owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  doctor_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  PRIMARY KEY (owner_id, doctor_id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 -- 🐶 Animals (formerly dogs)
 CREATE TABLE animals (
   id SERIAL PRIMARY KEY,

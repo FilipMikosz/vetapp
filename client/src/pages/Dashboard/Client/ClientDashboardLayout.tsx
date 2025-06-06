@@ -23,9 +23,11 @@ import {
 } from '@mui/material'
 import {
   Dashboard as DashboardIcon,
+  LocalHospital,
   Logout as LogoutIcon,
   Menu as MenuIcon,
   Person as PersonIcon,
+  Pets,
   Settings as SettingsIcon,
 } from '@mui/icons-material'
 import { Outlet, useNavigate } from 'react-router-dom'
@@ -47,8 +49,8 @@ export default function ClientDashboardLayout() {
   }
 
   const menuItems = [
-    { text: 'My doctors', icon: <DashboardIcon />, path: 'records' },
-    { text: 'My animals', icon: <DashboardIcon />, path: 'records' },
+    { text: 'My doctors', icon: <LocalHospital />, path: 'my-doctors' },
+    { text: 'My animals', icon: <Pets />, path: 'my-animals' },
     { text: 'Profile', icon: <PersonIcon />, path: 'profile' },
     { text: 'Settings', icon: <SettingsIcon />, path: 'settings' },
     { text: 'Logout', icon: <LogoutIcon />, action: handleLogoutClick },

@@ -1,0 +1,49 @@
+const pool = require('../db/db')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
+
+const getAllDoctors = async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, first_name, last_name, email FROM users WHERE role = 'doctor'"
+    )
+    res.json(result.rows)
+  } catch (error) {
+    console.error('Error fetching doctors:', error)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
+
+// ➕ Add doctor to logged-in user (owner)
+const addDoctor = async (req, res) => {
+  const ownerId = req.user.userId
+  const { doctorId } = req.body
+
+  try {
+    // Check if already added
+    const exists = await pool.query(
+      'SELECT 1 FROM user_doctor WHERE owner_id = $1 AND doctor_id = $2',
+      [ownerId, doctorId]
+    )
+
+    if (exists.rowCount > 0) {
+      return res.status(400).json({ error: 'Doctor already added' })
+    }
+
+    await pool.query(
+      'INSERT INTO user_doctor (owner_id, doctor_id) VALUES ($1, $2)',
+      [ownerId, doctorId]
+    )
+
+    res.status(201).json({ message: 'Doctor added' })
+  } catch (error) {
+    console.error('Error adding doctor:', error)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
+
+module.exports = {
+  getAllDoctors,
+  addDoctor,
+}
