@@ -17,7 +17,6 @@ CREATE TABLE user_doctor (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
 -- 🐶 Animals (formerly dogs)
 CREATE TABLE animals (
   id SERIAL PRIMARY KEY,

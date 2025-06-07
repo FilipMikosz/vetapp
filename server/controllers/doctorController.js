@@ -43,7 +43,26 @@ const addDoctor = async (req, res) => {
   }
 }
 
+const getMyDoctors = async (req, res) => {
+  const ownerId = req.user.userId
+
+  try {
+    const result = await pool.query(
+      `SELECT u.id, u.first_name, u.last_name, u.email
+       FROM user_doctor ud
+       JOIN users u ON ud.doctor_id = u.id
+       WHERE ud.owner_id = $1`,
+      [ownerId]
+    )
+    res.json(result.rows)
+  } catch (error) {
+    console.error('Error fetching my doctors:', error)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
+
 module.exports = {
   getAllDoctors,
   addDoctor,
+  getMyDoctors,
 }
