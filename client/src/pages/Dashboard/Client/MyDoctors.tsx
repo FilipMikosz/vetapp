@@ -119,11 +119,37 @@ const MyDoctors = () => {
           Nie masz jeszcze przypisanego żadnego lekarza.
         </Typography>
       ) : (
-        <Stack spacing={2} mb={4}>
+        <Stack spacing={3} mb={5}>
           {myDoctors.map((doc) => (
-            <Typography key={doc.id}>
-              ✅ {doc.first_name} {doc.last_name} ({doc.email})
-            </Typography>
+            <Card key={doc.id} elevation={3}>
+              <CardContent
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: 2,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Avatar sx={{ bgcolor: 'primary.main' }}>
+                    <PersonIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant='h6'>
+                      {doc.first_name} {doc.last_name}
+                    </Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      {doc.email}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Typography variant='caption' color='text.secondary'>
+                  Twój lekarz
+                </Typography>
+              </CardContent>
+            </Card>
           ))}
         </Stack>
       )}
