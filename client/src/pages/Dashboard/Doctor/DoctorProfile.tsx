@@ -80,7 +80,7 @@ const DoctorProfile = () => {
         </Avatar>
         <CardContent>
           <Typography variant='h5' sx={{ mb: 1 }}>
-            Dr. {profile.first_name} {profile.last_name}
+            Dr {profile.first_name} {profile.last_name}
           </Typography>
           <Typography variant='body1' color='textSecondary'>
             Email: {profile.email}
