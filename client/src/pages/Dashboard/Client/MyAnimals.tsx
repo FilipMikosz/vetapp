@@ -14,8 +14,10 @@ import {
   DialogActions,
   DialogContent,
   TextField,
+  IconButton,
 } from '@mui/material'
 import PetsIcon from '@mui/icons-material/Pets'
+import DeleteIcon from '@mui/icons-material/Delete'
 
 interface Animal {
   id: number
@@ -30,6 +32,8 @@ const MyAnimals = () => {
   const [animals, setAnimals] = useState<Animal[]>([])
   const [loading, setLoading] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [nameError, setNameError] = useState(false)
+
   const [formData, setFormData] = useState({
     name: '',
     breed: '',
@@ -37,6 +41,10 @@ const MyAnimals = () => {
     chip_number: '',
     kennel_name: '',
   })
+
+  // State for delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [animalToDelete, setAnimalToDelete] = useState<Animal | null>(null)
 
   const token = localStorage.getItem('token')
 
@@ -48,7 +56,6 @@ const MyAnimals = () => {
           Authorization: `Bearer ${token}`,
         },
       })
-
       const data = await res.json()
       setAnimals(data)
     } catch (err) {
@@ -67,9 +74,17 @@ const MyAnimals = () => {
       ...formData,
       [e.target.name]: e.target.value,
     })
+    if (e.target.name === 'name' && e.target.value.trim() !== '') {
+      setNameError(false)
+    }
   }
 
   const handleAddAnimal = async () => {
+    if (!formData.name.trim()) {
+      setNameError(true)
+      return
+    }
+
     try {
       const res = await fetch('http://localhost:3000/api/animals/add', {
         method: 'POST',
@@ -94,8 +109,44 @@ const MyAnimals = () => {
         chip_number: '',
         kennel_name: '',
       })
+      setNameError(false)
     } catch (err) {
       console.error('Error adding animal:', err)
+    }
+  }
+
+  // Open delete confirmation dialog
+  const confirmDeleteAnimal = (animal: Animal) => {
+    setAnimalToDelete(animal)
+    setDeleteDialogOpen(true)
+  }
+
+  // Actually delete after confirmation
+  const handleDeleteAnimal = async () => {
+    if (!animalToDelete) return
+
+    try {
+      const res = await fetch(
+        `http://localhost:3000/api/animals/${animalToDelete.id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      if (!res.ok) {
+        throw new Error('Failed to delete animal')
+      }
+
+      setAnimals((prev) =>
+        prev.filter((animal) => animal.id !== animalToDelete.id)
+      )
+      setDeleteDialogOpen(false)
+      setAnimalToDelete(null)
+    } catch (err) {
+      console.error('Error deleting animal:', err)
     }
   }
 
@@ -123,28 +174,43 @@ const MyAnimals = () => {
           {animals.map((animal) => (
             <Card key={animal.id} elevation={2}>
               <CardContent
-                sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  justifyContent: 'space-between',
+                }}
               >
-                <Avatar>
-                  <PetsIcon />
-                </Avatar>
-                <Box>
-                  <Typography variant='h6'>{animal.name}</Typography>
-                  <Typography variant='body2' color='text.secondary'>
-                    Rasa: {animal.breed || 'Nieznana'} | Rok urodzenia:{' '}
-                    {animal.birth_year || 'Brak'}
-                  </Typography>
-                  {animal.kennel_name && (
-                    <Typography variant='body2'>
-                      Przydomek: {animal.kennel_name}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Avatar>
+                    <PetsIcon />
+                  </Avatar>
+                  <Box>
+                    <Typography variant='h6'>{animal.name}</Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      Rasa: {animal.breed || 'Nieznana'} | Rok urodzenia:{' '}
+                      {animal.birth_year || 'Brak'}
                     </Typography>
-                  )}
-                  {animal.chip_number && (
-                    <Typography variant='body2'>
-                      Chip: {animal.chip_number}
-                    </Typography>
-                  )}
+                    {animal.kennel_name && (
+                      <Typography variant='body2'>
+                        Przydomek: {animal.kennel_name}
+                      </Typography>
+                    )}
+                    {animal.chip_number && (
+                      <Typography variant='body2'>
+                        Chip: {animal.chip_number}
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
+                <IconButton
+                  onClick={() => confirmDeleteAnimal(animal)}
+                  aria-label='delete'
+                  size='small'
+                  sx={{ color: 'black' }}
+                >
+                  <DeleteIcon />
+                </IconButton>
               </CardContent>
               <Divider />
             </Card>
@@ -152,9 +218,13 @@ const MyAnimals = () => {
         </Stack>
       )}
 
+      {/* Add Animal Dialog */}
       <Dialog
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        onClose={() => {
+          setDialogOpen(false)
+          setNameError(false)
+        }}
         fullWidth
         maxWidth='sm'
       >
@@ -168,6 +238,8 @@ const MyAnimals = () => {
               onChange={handleInputChange}
               required
               fullWidth
+              error={nameError}
+              helperText={nameError ? 'Imię jest wymagane' : ''}
             />
             <TextField
               label='Rasa'
@@ -201,9 +273,40 @@ const MyAnimals = () => {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Anuluj</Button>
+          <Button
+            onClick={() => {
+              setDialogOpen(false)
+              setNameError(false)
+            }}
+          >
+            Anuluj
+          </Button>
           <Button variant='contained' onClick={handleAddAnimal}>
             Zapisz
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Potwierdź usunięcie</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Czy na pewno chcesz usunąć zwierzę{' '}
+            <strong>{animalToDelete?.name}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Anuluj</Button>
+          <Button
+            variant='contained'
+            color='error'
+            onClick={handleDeleteAnimal}
+          >
+            Usuń
           </Button>
         </DialogActions>
       </Dialog>

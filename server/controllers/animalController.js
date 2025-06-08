@@ -46,7 +46,30 @@ const addAnimal = async (req, res) => {
   }
 }
 
+const deleteAnimal = async (req, res) => {
+  const ownerId = req.user.userId
+  const { id } = req.params
+
+  try {
+    // Delete only if the animal belongs to the logged-in owner
+    const result = await pool.query(
+      'DELETE FROM animals WHERE id = $1 AND owner_id = $2 RETURNING id',
+      [id, ownerId]
+    )
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Animal not found or unauthorized' })
+    }
+
+    res.status(200).json({ message: 'Animal deleted successfully', id })
+  } catch (err) {
+    console.error('Error deleting animal:', err)
+    res.status(500).json({ error: 'Server error' })
+  }
+}
+
 module.exports = {
   getMyAnimals,
   addAnimal,
+  deleteAnimal,
 }
