@@ -3,6 +3,7 @@ const pool = require('./db/db')
 const userRoutes = require('./routes/userRoutes')
 const recordRoutes = require('./routes/recordRoutes')
 const doctorRoutes = require('./routes/doctorRoutes')
+const animalsRoutes = require('./routes/animalsRoutes')
 const cors = require('cors')
 
 require('dotenv').config()
@@ -20,6 +21,7 @@ app.use(express.json())
 app.use('/api/users', userRoutes)
 app.use('/api/records', recordRoutes)
 app.use('/api/doctors', doctorRoutes)
+app.use('/api/animals', animalsRoutes)
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
