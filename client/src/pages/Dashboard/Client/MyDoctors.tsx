@@ -11,11 +11,18 @@ import {
   Stack,
   CircularProgress,
   Divider,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@mui/material'
 import {
   Person as PersonIcon,
   Add as AddIcon,
   Check as CheckIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material'
 
 interface Doctor {
@@ -31,6 +38,8 @@ const MyDoctors = () => {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(false)
   const [addingDoctorId, setAddingDoctorId] = useState<number | null>(null)
+  const [openConfirm, setOpenConfirm] = useState(false)
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
 
   const token = localStorage.getItem('token')
 
@@ -45,8 +54,6 @@ const MyDoctors = () => {
       const data: Doctor[] = await res.json()
       setAllDoctors(data)
 
-      // Simulate "my doctors" list: fetch all then mark some as "mine"
-      // TODO: Replace with actual GET /api/doctors/mine when you implement it
       const myDoctorRes = await fetch(
         'http://localhost:3000/api/doctors/mine',
         {
@@ -86,7 +93,6 @@ const MyDoctors = () => {
         return
       }
 
-      // Add to local state
       const addedDoctor = allDoctors.find((doc) => doc.id === doctorId)
       if (addedDoctor) {
         setMyDoctors((prev) => [...prev, addedDoctor])
@@ -95,6 +101,35 @@ const MyDoctors = () => {
       console.error('Error adding doctor:', error)
     } finally {
       setAddingDoctorId(null)
+    }
+  }
+
+  const handleRemoveDoctor = async () => {
+    if (!selectedDoctor) return
+
+    try {
+      const res = await fetch('http://localhost:3000/api/doctors/remove', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ doctorId: selectedDoctor.id }),
+      })
+
+      if (res.ok) {
+        setMyDoctors((prev) =>
+          prev.filter((doc) => doc.id !== selectedDoctor.id)
+        )
+      } else {
+        const err = await res.json()
+        console.error(err.error)
+      }
+    } catch (error) {
+      console.error('Error removing doctor:', error)
+    } finally {
+      setOpenConfirm(false)
+      setSelectedDoctor(null)
     }
   }
 
@@ -145,9 +180,20 @@ const MyDoctors = () => {
                   </Box>
                 </Box>
 
-                <Typography variant='caption' color='text.secondary'>
-                  Twój lekarz
-                </Typography>
+                <Box>
+                  <Typography variant='caption' color='text.secondary'>
+                    Twój lekarz
+                  </Typography>
+                  <IconButton
+                    color='error'
+                    onClick={() => {
+                      setSelectedDoctor(doc)
+                      setOpenConfirm(true)
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
               </CardContent>
             </Card>
           ))}
@@ -209,6 +255,27 @@ const MyDoctors = () => {
           })}
         </Stack>
       )}
+
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Potwierdź usunięcie</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Czy na pewno chcesz usunąć lekarza{' '}
+            <strong>
+              {selectedDoctor?.first_name} {selectedDoctor?.last_name}
+            </strong>{' '}
+            z listy?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)} color='primary'>
+            Anuluj
+          </Button>
+          <Button onClick={handleRemoveDoctor} color='error'>
+            Usuń lekarza
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
