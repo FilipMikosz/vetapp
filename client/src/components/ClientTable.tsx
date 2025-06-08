@@ -28,7 +28,15 @@ export default function ClientTable() {
   const [selectedOwner, setSelectedOwner] = useState<Owner | null>(null)
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/users/getusers')
+    const token = localStorage.getItem('token')
+
+    fetch('http://localhost:3000/api/users/getusers', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then((data) => setOwners(data))
   }, [])

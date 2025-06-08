@@ -77,15 +77,45 @@ const loginUser = async (req, res) => {
   }
 }
 
+// const getUsers = async (req, res) => {
+//   const user = req.user
+
+//   if (!user) {
+//     return res.status(401).json({ error: 'Unauthorized' })
+//   }
+//   try {
+//     const result = await pool.query('SELECT * FROM users WHERE role = $1', [
+//       'owner',
+//     ])
+//     res.status(200).json(result.rows)
+//   } catch (err) {
+//     console.error(err)
+//     res.status(500).json({ error: 'Internal server error' })
+//   }
+// }
+
 const getUsers = async (req, res) => {
+  const user = req.user
+
+  if (!user || user.role !== 'doctor') {
+    return res.status(403).json({ error: 'Forbidden' })
+  }
+
   try {
-    const result = await pool.query('SELECT * FROM users WHERE role = $1', [
-      'owner',
-    ])
-    res.status(200).json(result.rows)
+    const result = await pool.query(
+      `
+      SELECT u.*
+      FROM users u
+      INNER JOIN user_doctor ud ON u.id = ud.owner_id
+      WHERE ud.doctor_id = $1 AND u.role = 'owner'
+      `,
+      [user.userId]
+    )
+
+    return res.status(200).json(result.rows)
   } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: 'Internal server error' })
+    console.error('Error fetching users for doctor:', err)
+    return res.status(500).json({ error: 'Internal server error' })
   }
 }
 
