@@ -93,6 +93,7 @@ const getAnimalRecordsByUserId = async (req, res) => {
 const insertAnimalRecord = async (req, res) => {
   const { animalId, tableName } = req.params
   const fields = allowedTables[tableName]
+  // const user = req.user
 
   if (!fields) {
     return res.status(400).json({ error: 'Invalid table name' })
@@ -106,6 +107,28 @@ const insertAnimalRecord = async (req, res) => {
   const placeholders = values.map((_, i) => `$${i + 1}`).join(', ')
 
   try {
+    // const animalRes = await pool.query(
+    //   'SELECT owner_id FROM animals WHERE id = $1',
+    //   [animalId]
+    // )
+    // if (animalRes.rows.length === 0) {
+    //   return res.status(404).json({ error: 'Animal not found' })
+    // }
+
+    // const ownerId = animalRes.rows[0].owner_id
+
+    // // 2. Check if this doctor is linked to that owner
+    // const linkRes = await pool.query(
+    //   'SELECT * FROM user_doctor WHERE owner_id = $1 AND doctor_id = $2',
+    //   [ownerId, user.id]
+    // )
+
+    // if (linkRes.rows.length === 0) {
+    //   return res.status(403).json({
+    //     error: 'You are not assigned to this animal’s owner',
+    //   })
+    // }
+
     const result = await pool.query(
       `INSERT INTO ${tableName} (${columns.join(
         ', '
