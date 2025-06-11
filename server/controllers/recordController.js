@@ -1,5 +1,17 @@
 const pool = require('../db/db')
 
+const allowedTables = {
+  litters: ['year', 'description'],
+  illnesses: ['name', 'date', 'notes'],
+  vaccinations: ['name', 'date', 'mandatory'],
+  prescriptions: ['medication_name', 'dosage', 'date_prescribed', 'notes'],
+  administered_medications: ['medication_name', 'dosage', 'date_administered'],
+  imaging: ['type', 'image_url', 'date', 'description'],
+  lab_tests: ['test_name', 'result', 'date', 'document_url'],
+  special_notes: ['note', 'date_added'],
+  visits: ['doctor_id', 'visit_date', 'reason', 'notes'],
+}
+
 // GET /api/records/:userId
 const getAnimalRecordsByUserId = async (req, res) => {
   const userId = req.params.userId
@@ -78,6 +90,37 @@ const getAnimalRecordsByUserId = async (req, res) => {
   }
 }
 
+const insertAnimalRecord = async (req, res) => {
+  const { animalId, tableName } = req.params
+  const fields = allowedTables[tableName]
+
+  if (!fields) {
+    return res.status(400).json({ error: 'Invalid table name' })
+  }
+
+  const data = req.body
+
+  // Build SQL
+  const columns = ['animal_id', ...fields]
+  const values = [animalId, ...fields.map((f) => data[f])]
+  const placeholders = values.map((_, i) => `$${i + 1}`).join(', ')
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO ${tableName} (${columns.join(
+        ', '
+      )}) VALUES (${placeholders}) RETURNING *`,
+      values
+    )
+
+    res.status(201).json(result.rows[0])
+  } catch (err) {
+    console.error('Insert error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
 module.exports = {
   getAnimalRecordsByUserId,
+  insertAnimalRecord,
 }
